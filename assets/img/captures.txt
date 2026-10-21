@@ -1,0 +1,19 @@
+# Captures d'écran affichées sur le site
+# 1. Dépose l'image dans ce dossier (assets/img), en PNG ou en JPG.
+# 2. Ajoute une ligne : nom-du-fichier.png | légende
+# Le début du nom choisit la page : nordia-, helios-, vertier- ou sportlife-.
+# Les images s'affichent dans l'ordre des lignes, sous la partie « La question » du cas.
+# Une ligne qui commence par # est ignorée. Une ligne dont l'image n'existe pas encore ne s'affiche pas.
+
+helios-1.png | La page Synthèse groupe du rapport Power BI
+helios-2.png | La page Analyse des écarts : le pont d'EBITDA et les centres de coût les plus en retard
+helios-3.png | La page Focus business unit
+helios-4.png | Le modèle en étoile dans la vue Modèle de Power BI
+sportlife-1.png | Le tableau de bord des ventes dans Power BI
+vertier-1.png | Les tableaux croisés dynamiques de la feuille TCD
+vertier-2.png | Le compte de résultat 2025 par point de vente (feuille CR_magasins)
+vertier-3.png | Fermer ou garder Nice Masséna et Reims Centre (feuille Scenarios)
+nordia-1.png | Q32 dans pgAdmin : le tableau de bord mensuel 2025 du comité de direction
+nordia-2.png | Q20 : l'écart de marge 2025 par région, effet activité et effet prix/mix
+nordia-3.png | Q23 : la balance âgée des créances au 31/12/2025
+nordia-4.png | Q17 : le classement ABC des 180 références sur la marge 2025

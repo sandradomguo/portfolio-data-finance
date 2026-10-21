@@ -1,0 +1,258 @@
+// =============================================================================
+//  Groupe HÉLIOS · Tableau de bord du comité de direction
+//  Toutes les mesures DAX du modèle, rangées dans la table _Mesures.
+//  Convention : montants stockés en positif, signe porté par Dim_Compte[Sens]
+//  (+1 produit, -1 charge). Les charges sortent donc en négatif et le compte
+//  de résultat se construit par simple addition.
+//  Auteure : Sandra DOMGUO · données fictives
+// =============================================================================
+
+
+// ---------------------------------------------------------------- 1. Compte de résultat
+
+// Montant signé : +1 pour un produit, -1 pour une charge (colonne Sens du plan de comptes).
+[Montant réel] =
+    SUMX (
+        Faits_Realise,
+        Faits_Realise[Montant] * RELATED ( Dim_Compte[Sens] )
+    )
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+[Chiffre d'affaires] =
+    CALCULATE ( [Montant réel], Dim_Compte[Rubrique_PnL] = "Chiffre d'affaires" )
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+// Valeur négative (charge).
+[Achats consommés] =
+    CALCULATE ( [Montant réel], Dim_Compte[Rubrique_PnL] = "Achats consommés" )
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+// Valeur négative (charge).
+[Charges externes] =
+    CALCULATE ( [Montant réel], Dim_Compte[Rubrique_PnL] = "Charges externes" )
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+// Valeur négative (charge).
+[Impôts et taxes] =
+    CALCULATE ( [Montant réel], Dim_Compte[Rubrique_PnL] = "Impôts et taxes" )
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+// Valeur négative (charge).
+[Charges de personnel] =
+    CALCULATE ( [Montant réel], Dim_Compte[Rubrique_PnL] = "Charges de personnel" )
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+// Valeur négative (charge).
+[Autres charges] =
+    CALCULATE ( [Montant réel], Dim_Compte[Rubrique_PnL] = "Autres charges" )
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+// Valeur négative (charge).
+[Dotations] =
+    CALCULATE ( [Montant réel], Dim_Compte[Rubrique_PnL] = "Dotations" )
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+// Les charges étant déjà négatives, l'EBITDA est une simple addition.
+[EBITDA] =
+    [Chiffre d'affaires]
+        + [Achats consommés]
+        + [Charges externes]
+        + [Impôts et taxes]
+        + [Charges de personnel]
+        + [Autres charges]
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+[Résultat d'exploitation] =
+    [EBITDA] + [Dotations]
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+[Marge d'EBITDA %] =
+    DIVIDE ( [EBITDA], [Chiffre d'affaires] )
+// Format : 0.0 %;-0.0 %;0.0 %
+
+[Marge opérationnelle %] =
+    DIVIDE ( [Résultat d'exploitation], [Chiffre d'affaires] )
+// Format : 0.0 %;-0.0 %;0.0 %
+
+
+// ---------------------------------------------------------------- 2. Budget et écarts
+
+[Montant budget] =
+    SUMX (
+        Faits_Budget,
+        Faits_Budget[Montant] * RELATED ( Dim_Compte[Sens] )
+    )
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+[CA budget] =
+    CALCULATE ( [Montant budget], Dim_Compte[Rubrique_PnL] = "Chiffre d'affaires" )
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+[EBITDA budget] =
+    CALCULATE ( [Montant budget], Dim_Compte[Rubrique_PnL] <> "Dotations" )
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+[Marge d'EBITDA budget %] =
+    DIVIDE ( [EBITDA budget], [CA budget] )
+// Format : 0.0 %;-0.0 %;0.0 %
+
+[Écart CA] =
+    [Chiffre d'affaires] - [CA budget]
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+[Écart EBITDA] =
+    [EBITDA] - [EBITDA budget]
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+[Écart EBITDA %] =
+    DIVIDE ( [Écart EBITDA], ABS ( [EBITDA budget] ) )
+// Format : 0.0 %;-0.0 %;0.0 %
+
+[Taux d'atteinte EBITDA %] =
+    DIVIDE ( [EBITDA], [EBITDA budget] )
+// Format : 0.0 %;-0.0 %;0.0 %
+
+// Montants signés : un écart positif est toujours favorable, sur un produit comme sur une charge.
+[Écart montant] =
+    [Montant réel] - [Montant budget]
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+[Écart montant %] =
+    DIVIDE ( [Écart montant], ABS ( [Montant budget] ) )
+// Format : 0.0 %;-0.0 %;0.0 %
+
+[Sens de l'écart] =
+    VAR e = [Écart montant]
+    RETURN
+        IF ( ISBLANK ( e ), BLANK (), IF ( e >= 0, "Favorable", "Défavorable" ) )
+
+// Pour la mise en forme conditionnelle (couleur de police, valeur du champ).
+[Couleur écart] =
+    VAR e = [Écart montant]
+    RETURN
+        IF ( ISBLANK ( e ), BLANK (), IF ( e >= 0, "#1F7A45", "#B42318" ) )
+
+// Point de départ = EBITDA budgété, puis l'écart de chaque rubrique. Le total du graphique en cascade redonne l'EBITDA réel.
+[Pont EBITDA] =
+    VAR etape = SELECTEDVALUE ( Pont_EBITDA[Etape] )
+    RETURN
+        SWITCH (
+            TRUE (),
+            ISBLANK ( etape ), [EBITDA],
+            etape = "EBITDA budget", [EBITDA budget],
+            CALCULATE ( [Écart montant], Dim_Compte[Rubrique_PnL] = etape )
+        )
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+// N'affiche que les 10 centres de coût aux écarts les plus défavorables.
+[Écart EBITDA (10 pires centres)] =
+    VAR centres =
+        FILTER ( ALLSELECTED ( Dim_CentreCout[Centre_de_cout] ), NOT ISBLANK ( [Écart EBITDA] ) )
+    VAR rang =
+        RANKX ( centres, [Écart EBITDA], , ASC, DENSE )
+    RETURN
+        IF ( NOT ISBLANK ( [Écart EBITDA] ) && rang <= 10, [Écart EBITDA] )
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+
+// ---------------------------------------------------------------- 3. Temps
+
+[CA N-1] =
+    CALCULATE ( [Chiffre d'affaires], SAMEPERIODLASTYEAR ( Dim_Date[Date] ) )
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+[EBITDA N-1] =
+    CALCULATE ( [EBITDA], SAMEPERIODLASTYEAR ( Dim_Date[Date] ) )
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+[Montant N-1] =
+    CALCULATE ( [Montant réel], SAMEPERIODLASTYEAR ( Dim_Date[Date] ) )
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+[Variation CA %] =
+    DIVIDE ( [Chiffre d'affaires] - [CA N-1], ABS ( [CA N-1] ) )
+// Format : 0.0 %;-0.0 %;0.0 %
+
+[Variation EBITDA] =
+    [EBITDA] - [EBITDA N-1]
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+[CA YTD] =
+    TOTALYTD ( [Chiffre d'affaires], Dim_Date[Date] )
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+[EBITDA YTD] =
+    TOTALYTD ( [EBITDA], Dim_Date[Date] )
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+[EBITDA budget YTD] =
+    TOTALYTD ( [EBITDA budget], Dim_Date[Date] )
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+[Taux d'atteinte EBITDA YTD %] =
+    DIVIDE ( [EBITDA YTD], [EBITDA budget YTD] )
+// Format : 0.0 %;-0.0 %;0.0 %
+
+// Moyenne des EBITDA mensuels des trois derniers mois.
+[EBITDA moyenne mobile 3 mois] =
+    VAR fin = MAX ( Dim_Date[Date] )
+    RETURN
+        CALCULATE (
+            AVERAGEX ( VALUES ( Dim_Date[Debut_de_mois] ), [EBITDA] ),
+            DATESINPERIOD ( Dim_Date[Date], fin, -3, MONTH )
+        )
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+
+// ---------------------------------------------------------------- 4. RH
+
+// Mesure de stock : somme des catégories dans le mois, puis moyenne des mois.
+[Effectif ETP] =
+    AVERAGEX (
+        VALUES ( Dim_Date[Debut_de_mois] ),
+        CALCULATE ( SUM ( Faits_Effectifs[ETP] ) )
+    )
+// Format : #,0.0
+
+[CA par ETP] =
+    DIVIDE ( [Chiffre d'affaires], [Effectif ETP] )
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+[Coût moyen par ETP] =
+    DIVIDE ( ABS ( [Charges de personnel] ), [Effectif ETP] )
+// Format : #,0 "€";-#,0 "€";0 "€"
+
+[Masse salariale % CA] =
+    DIVIDE ( ABS ( [Charges de personnel] ), [Chiffre d'affaires] )
+// Format : 0.0 %;-0.0 %;0.0 %
+
+
+// ---------------------------------------------------------------- 5. Affichage
+
+[Réel (k€)] =
+    DIVIDE ( [Montant réel], 1000 )
+// Format : #,0 "k€";-#,0 "k€";0 "k€"
+
+[Budget (k€)] =
+    DIVIDE ( [Montant budget], 1000 )
+// Format : #,0 "k€";-#,0 "k€";0 "k€"
+
+[N-1 (k€)] =
+    DIVIDE ( [Montant N-1], 1000 )
+// Format : #,0 "k€";-#,0 "k€";0 "k€"
+
+[Écart (k€)] =
+    DIVIDE ( [Écart montant], 1000 )
+// Format : #,0 "k€";-#,0 "k€";0 "k€"
+
+[Dernière actualisation] =
+    "Données à fin " & FORMAT ( CALCULATE ( MAX ( Faits_Realise[Date] ), REMOVEFILTERS () ), "mmmm yyyy" )
+
+[Titre BU] =
+    VAR n = COUNTROWS ( VALUES ( Dim_Entite[Business_Unit] ) )
+    RETURN
+        IF (
+            n = 1,
+            "Compte de résultat · " & SELECTEDVALUE ( Dim_Entite[Business_Unit] ),
+            "Compte de résultat · groupe (" & n & " business units)"
+        )
