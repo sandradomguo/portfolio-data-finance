@@ -1,6 +1,7 @@
 # Sandra DOMGUO · portfolio de contrôle de gestion
 
-Contrôleuse de gestion junior : deux ans d'alternance au contrôle de gestion du groupe Canal+ (seize filiales internationales), master Grande École Finance et Contrôle de Gestion à l'EMLV. Je cherche un CDI en contrôle de gestion ou en FP&A en Île-de-France, disponible immédiatement.
+Je totalise 3 ans d’expérience dont 2 ans sur un périmètre de 16 filiales internationales. Formée aux enjeux de la finance et de la data, j’optimise les processus pour appuyer la production d’analyses fiables et faciliter le respect des échéances de clôture et de budget. Je suis titulaire d'un master (Programme Grande École) en Finance et Contrôle de Gestion obtenu à l'Ecole de Management Léonard de Vinci. Je recherche un poste de contrôleuse de gestion ou FP&A en Île-de-France et suis disponible immédiatement pour contribuer au pilotage
+de votre performance..
 
 Ce dépôt contient mon portfolio : quatre cas pratiques traités de bout en bout, de la question posée par la direction à la recommandation chiffrée. Les données sont fictives.
 
@@ -20,4 +21,4 @@ Chaque dossier de `projets/` contient les livrables (requêtes, rapports, classe
 
 ## Contact
 
-dmgsandra@gmail.com
+sandradomguo@gmail.com
